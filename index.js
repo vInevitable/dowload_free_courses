@@ -39,61 +39,64 @@ async function getGdriveUrl(url) {
 /**
  * 
  * @require {string} courseUrl is required
- * @require {string} outputDir is required
+ * @require {string} saveDir is required
  */
 async function downloadCrunchLearnCourse({
   courseUrl = '',
-  outputDir = '',
+  saveDir = '',
 }) {
   try {
     if (!courseUrl) {
       throw new Error('courseUrl is required');
     }
-    if (!outputDir) {
-      throw new Error('Output directory is required');
+    if (!saveDir) {
+      throw new Error('Saving files directory is required');
     }
-    console.debug('Calling the course url');
+    if (!Fs.existsSync(saveDir)) {
+      Fs.mkdirSync(saveDir);
+    }
+    console.log('Calling the course url');
     const res = await Axios.get(courseUrl);
-    console.debug('Converting the response html string to HTML element');
+    console.log('Converting the response html string to HTML element');
     const parsedString = parse(res.data);
-    console.debug('Fetching the Sections');
+    console.log('Fetching the Sections');
     const sections = parsedString.querySelectorAll('#toc-1');
     if (!sections.length) {
       throw new Error('No sections found for the course');
     }
-    console.debug('Processing all sections');
+    console.log('Processing all sections');
     const urlsList = sections.map((section) => {
       return section.querySelectorAll('.flex').filter((a) => {
         return !!a.attrs.href
       }).map((a) => a.attrs.href)
     }).flat(2);
 
-    console.debug('Processing all url tags for google drive urls');
+    console.log('Processing all url tags for google drive urls');
     const gdriveUrls = [];
     for (let urlIdx = 0; urlIdx < urlsList.length; urlIdx += 10) {
       const urls = await Promise.all(urlsList.slice(urlIdx, urlIdx + 10).map(getGdriveUrl))
       gdriveUrls.push(...urls);
     }
-    console.debug('Download from google drive urls');
+    console.log('Download from google drive urls');
     let idx = 1;
     for (const url of gdriveUrls) {
       await downloadVideo({
         url,
-        path: `./${outputDir}/${idx}`
+        path: `./${saveDir}/${idx}`
       });
-      console.debug('Download Completed video: ' + idx);
+      console.log('Download Completed video: ' + idx);
       idx++;
     }
-    console.debug('Download Completed');
+    console.log('Download Completed');
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-const args = process.argv.slice(2).filter((val) => val.includes('courseUrl') || val.includes('outputDir'));
+const args = process.argv.slice(2).filter((val) => val.includes('courseUrl') || val.includes('saveDir'));
 if (args.length < 2) {
-  console.error('Please pass the arguments like courseUrl=url outputDir=dir');
+  console.error('Please pass the arguments like courseUrl=url saveDir=dir');
   process.exit(1);
 };
 let params = {};
