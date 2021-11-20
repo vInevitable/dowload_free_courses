@@ -1,0 +1,22 @@
+{
+  "name": "download_crunchlearn_courses",
+  "version": "1.0.0",
+  "description": "Download the courses in your local system from the site crunchlearn.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node index.js"
+  },
+  "author": "vInevitable",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.24.0",
+    "node-html-parser": "^5.1.0"
+  },
+  "tags": [
+    "crunchlearn",
+    "download",
+    "udemy",
+    "plural-sight"
+  ]
+} 
